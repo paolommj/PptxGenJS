@@ -12,7 +12,7 @@ import { PresSlide, SlideLayout, ISlideRelMedia } from './core-interfaces'
  */
 export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Promise<string>> {
 	// STEP 1: Detect real Node runtime once
-	const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node'
+	const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node' && false
 	// These will be filled only when we’re in Node
 	let fs: typeof import('node:fs') | undefined
 	let https: typeof import('node:https') | undefined
