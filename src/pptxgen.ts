@@ -601,7 +601,7 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	async writeFile(props?: WriteFileProps | string): Promise<string> {
 		// STEP 1: Figure out where we are running
-		const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node'
+		const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node' && false
 
 		// STEP 2: Normalise the user arguments
 		if (typeof props === 'string') {
