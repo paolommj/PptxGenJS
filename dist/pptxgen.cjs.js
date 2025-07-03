@@ -1,4 +1,4 @@
-/* PptxGenJS 4.0.1 @ 2025-07-03T11:12:41.723Z */
+/* PptxGenJS 4.0.1 @ 2025-07-03T11:19:05.011Z */
 'use strict';
 
 var JSZip = require('jszip');
@@ -4832,22 +4832,6 @@ function createLineCap(lineCap) {
  * @return {Promise} promise
  */
 function encodeSlideMediaRels(layout) {
-    var _a, _b;
-    // STEP 1: Detect real Node runtime once
-    const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node' && false;
-    // These will be filled only when we’re in Node
-    let fs;
-    let https;
-    // STEP 2: Lazy-load Node built-ins if needed
-    const loadNodeDeps = isNode
-        ? () => __awaiter(this, void 0, void 0, function* () {
-            ({ default: fs } = yield import('node:fs'));
-            ({ default: https } = yield import('node:https'));
-        })
-        : () => __awaiter(this, void 0, void 0, function* () { });
-    // Immediately start it when we know we’re in Node
-    if (isNode)
-        loadNodeDeps();
     // STEP 3: Prepare promises list
     const imageProms = [];
     // A: Capture all audio/image/video candidates for encoding (filtering online/pre-encoded)
@@ -4868,50 +4852,6 @@ function encodeSlideMediaRels(layout) {
         .filter(rel => !rel.isDuplicate)
         .forEach(rel => {
         imageProms.push((() => __awaiter(this, void 0, void 0, function* () {
-            if (!https)
-                yield loadNodeDeps();
-            // ────────────  NODE LOCAL FILE  ────────────
-            if (isNode && fs && rel.path.indexOf('http') !== 0) {
-                try {
-                    const bitmap = fs.readFileSync(rel.path);
-                    rel.data = Buffer.from(bitmap).toString('base64');
-                    candidateRels
-                        .filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
-                        .forEach(dupe => (dupe.data = rel.data));
-                    return 'done';
-                }
-                catch (ex) {
-                    rel.data = IMG_BROKEN;
-                    candidateRels
-                        .filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
-                        .forEach(dupe => (dupe.data = rel.data));
-                    throw new Error(`ERROR: Unable to read media: "${rel.path}"\n${String(ex)}`);
-                }
-            }
-            // ────────────  NODE HTTP(S)  ────────────
-            if (isNode && https && rel.path.startsWith('http')) {
-                return yield new Promise((resolve, reject) => {
-                    https.get(rel.path, res => {
-                        let raw = '';
-                        res.setEncoding('binary'); // IMPORTANT: Only binary encoding works
-                        res.on('data', chunk => (raw += chunk));
-                        res.on('end', () => {
-                            rel.data = Buffer.from(raw, 'binary').toString('base64');
-                            candidateRels
-                                .filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
-                                .forEach(dupe => (dupe.data = rel.data));
-                            resolve('done');
-                        });
-                        res.on('error', () => {
-                            rel.data = IMG_BROKEN;
-                            candidateRels
-                                .filter(dupe => dupe.isDuplicate && dupe.path === rel.path)
-                                .forEach(dupe => (dupe.data = rel.data));
-                            reject(new Error(`ERROR! Unable to load image (https.get): ${rel.path}`));
-                        });
-                    });
-                });
-            }
             // ────────────  BROWSER  ────────────
             return yield new Promise((resolve, reject) => {
                 // A: build request
@@ -4955,14 +4895,7 @@ function encodeSlideMediaRels(layout) {
         .filter(rel => rel.isSvgPng && rel.data)
         .forEach(rel => {
         (() => __awaiter(this, void 0, void 0, function* () {
-            if (isNode && !fs)
-                yield loadNodeDeps();
-            if (isNode && fs) {
-                // console.log('Sorry, SVG is not supported in Node (more info: https://github.com/gitbrent/PptxGenJS/issues/401)')
-                rel.data = IMG_BROKEN;
-                imageProms.push(Promise.resolve('done'));
-            }
-            else {
+            {
                 imageProms.push(createSvgPngPreview(rel));
             }
         }))();
@@ -7189,7 +7122,7 @@ class PptxGenJS {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             // STEP 1: Figure out where we are running
-            const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node' && false;
+            typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node' && false;
             // STEP 2: Normalise the user arguments
             if (typeof props === 'string') {
                 // DEPRECATED: @deprecated v3.5.0 - fileName - [[remove in v4.0.0]]
@@ -7199,16 +7132,9 @@ class PptxGenJS {
             const { fileName: rawName = 'Presentation.pptx', compression = false } = props;
             const fileName = rawName.toLowerCase().endsWith('.pptx') ? rawName : `${rawName}.pptx`;
             // STEP 3: Get the binary/Blob from exportPresentation()
-            const outputType = isNode ? 'nodebuffer' : null;
+            const outputType = null;
             const data = yield this.exportPresentation({ compression, outputType });
             // STEP 4: Write the file out
-            if (isNode) {
-                // Dynamically import to avoid bundling fs in the browser build
-                const { promises: fs } = yield import('node:fs');
-                const { writeFile } = fs;
-                yield writeFile(fileName, data);
-                return fileName;
-            }
             // Browser branch - push a download
             yield this.writeFileToBrowser(fileName, data);
             return fileName;

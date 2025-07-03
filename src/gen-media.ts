@@ -11,20 +11,10 @@ import { PresSlide, SlideLayout, ISlideRelMedia } from './core-interfaces'
  * @return {Promise} promise
  */
 export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Promise<string>> {
-	// STEP 1: Detect real Node runtime once
-	const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node' && false
-	// These will be filled only when we’re in Node
-	let fs: typeof import('node:fs') | undefined
-	let https: typeof import('node:https') | undefined
 
-	// STEP 2: Lazy-load Node built-ins if needed
-	const loadNodeDeps = isNode
-		? async () => {
-			; ({ default: fs } = await import('node:fs')); ({ default: https } = await import('node:https'))
-		}
-		: async () => { }
-	// Immediately start it when we know we’re in Node
-	if (isNode) loadNodeDeps()
+	const isNode = false
+	const fs = undefined
+	const https = undefined
 
 	// STEP 3: Prepare promises list
 	const imageProms: Array<Promise<string>> = []
@@ -51,7 +41,6 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 		.forEach(rel => {
 			imageProms.push(
 				(async () => {
-					if (!https) await loadNodeDeps()
 
 					// ────────────  NODE LOCAL FILE  ────────────
 					if (isNode && fs && rel.path.indexOf('http') !== 0) {
@@ -140,7 +129,6 @@ export function encodeSlideMediaRels(layout: PresSlide | SlideLayout): Array<Pro
 		.filter(rel => rel.isSvgPng && rel.data)
 		.forEach(rel => {
 			(async () => {
-				if (isNode && !fs) await loadNodeDeps()
 				if (isNode && fs) {
 					// console.log('Sorry, SVG is not supported in Node (more info: https://github.com/gitbrent/PptxGenJS/issues/401)')
 					rel.data = IMG_BROKEN

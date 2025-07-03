@@ -613,17 +613,10 @@ export default class PptxGenJS implements IPresentationProps {
 		const fileName = rawName.toLowerCase().endsWith('.pptx') ? rawName : `${rawName}.pptx`
 
 		// STEP 3: Get the binary/Blob from exportPresentation()
-		const outputType = isNode ? ('nodebuffer' as const) : null
+		const outputType =  null
 		const data = await this.exportPresentation({ compression, outputType })
 
 		// STEP 4: Write the file out
-		if (isNode) {
-			// Dynamically import to avoid bundling fs in the browser build
-			const { promises: fs } = await import('node:fs')
-			const { writeFile } = fs
-			await writeFile(fileName, data as Buffer)
-			return fileName
-		}
 
 		// Browser branch - push a download
 		await this.writeFileToBrowser(fileName, data as Blob)
