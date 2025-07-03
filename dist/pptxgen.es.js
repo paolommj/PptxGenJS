@@ -1,4 +1,4 @@
-/* PptxGenJS 4.0.1 @ 2025-06-25T23:35:35.098Z */
+/* PptxGenJS 4.0.1 @ 2025-07-03T11:12:41.728Z */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -4832,7 +4832,7 @@ function createLineCap(lineCap) {
 function encodeSlideMediaRels(layout) {
     var _a, _b;
     // STEP 1: Detect real Node runtime once
-    const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node';
+    const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node' && false;
     // These will be filled only when we’re in Node
     let fs;
     let https;
@@ -7187,7 +7187,7 @@ class PptxGenJS {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             // STEP 1: Figure out where we are running
-            const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node';
+            const isNode = typeof process !== 'undefined' && !!((_a = process.versions) === null || _a === void 0 ? void 0 : _a.node) && ((_b = process.release) === null || _b === void 0 ? void 0 : _b.name) === 'node' && false;
             // STEP 2: Normalise the user arguments
             if (typeof props === 'string') {
                 // DEPRECATED: @deprecated v3.5.0 - fileName - [[remove in v4.0.0]]
